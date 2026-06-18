@@ -23,7 +23,7 @@
         </div>
     </section>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 relative z-10">
         {{-- Funding Progress Card --}}
         <div class="bg-dark-card border border-gray-700 rounded-xl p-6 sm:p-8 mb-8">
             <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">

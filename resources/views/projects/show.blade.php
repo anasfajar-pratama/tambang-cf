@@ -12,7 +12,7 @@
                 <div class="flex items-center space-x-3 mb-3">
                     <x-project-status-badge :status="$project->status" />
                     @if($project->investment_type)
-                        <span class="px-3 py-1 bg-dark-primary/80 text-gold text-xs font-semibold rounded-lg border border-gold/30">{{ $project->investment_type === 'equity' ? 'Ekuitas' : 'Pendanaan' }}</span>
+                        <span class="px-3 py-1 bg-dark-primary/80 text-gold text-xs font-semibold rounded-lg border border-gold/30">{{ $project->investment_type === 'single' ? 'Investor Tunggal' : 'Multi Investor' }}</span>
                     @endif
                 </div>
                 <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-2">{{ $project->title }}</h1>
@@ -99,29 +99,22 @@
                 @endif
 
                 {{-- Profit Sharing --}}
-                @if($project->profit_sharing_vendor || $project->profit_sharing_investor || $project->profit_sharing_platform)
-                <div class="bg-dark-card border border-gray-700 rounded-xl p-6">
+                @if($project->investor_share || $project->vendor_share)
+                <div class="bg-dark-card border border-gray-700 rounded-xl p-6 mb-8">
                     <h2 class="text-xl font-bold text-white mb-4">Skema Bagi Hasil</h2>
                     <div class="flex items-center justify-center space-x-8 py-8">
                         <div class="text-center">
                             <div class="w-24 h-24 rounded-full border-4 border-gold flex items-center justify-center mx-auto mb-3">
-                                <span class="text-2xl font-bold text-gold">{{ $project->profit_sharing_vendor ?? 0 }}%</span>
+                                <span class="text-2xl font-bold text-gold">{{ $project->vendor_share ?? 0 }}%</span>
                             </div>
                             <p class="text-sm text-gray-400">Vendor</p>
                         </div>
                         <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                         <div class="text-center">
                             <div class="w-24 h-24 rounded-full border-4 border-emerald flex items-center justify-center mx-auto mb-3">
-                                <span class="text-2xl font-bold text-emerald">{{ $project->profit_sharing_investor ?? 0 }}%</span>
+                                <span class="text-2xl font-bold text-emerald">{{ $project->investor_share ?? 0 }}%</span>
                             </div>
                             <p class="text-sm text-gray-400">Investor</p>
-                        </div>
-                        <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                        <div class="text-center">
-                            <div class="w-24 h-24 rounded-full border-4 border-gray-600 flex items-center justify-center mx-auto mb-3">
-                                <span class="text-2xl font-bold text-gray-300">{{ $project->profit_sharing_platform ?? 0 }}%</span>
-                            </div>
-                            <p class="text-sm text-gray-400">Platform</p>
                         </div>
                     </div>
                 </div>

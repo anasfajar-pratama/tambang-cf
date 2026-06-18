@@ -49,7 +49,7 @@
                             @forelse($recentProjects ?? [] as $project)
                                 <tr class="border-b border-gray-800">
                                     <td class="py-3 text-gray-200">{{ Str::limit($project->title, 30) }}</td>
-                                    <td class="py-3 text-gray-400">{{ $project->vendor->name ?? '-' }}</td>
+                                    <td class="py-3 text-gray-400">{{ $project->vendor->company_name ?? '-' }}</td>
                                     <td class="py-3"><x-project-status-badge :status="$project->status" /></td>
                                     <td class="py-3 text-right text-gray-200">Rp {{ number_format($project->target_capital ?? 0, 0, ',', '.') }}</td>
                                 </tr>
@@ -76,7 +76,7 @@
                         <tbody>
                             @forelse($recentTopups ?? [] as $topup)
                                 <tr class="border-b border-gray-800">
-                                    <td class="py-3 text-gray-200">{{ $topup->user->name ?? '-' }}</td>
+                                    <td class="py-3 text-gray-200">{{ $topup->lender->name ?? '-' }}</td>
                                     <td class="py-3 text-right text-gray-200">Rp {{ number_format($topup->amount ?? 0, 0, ',', '.') }}</td>
                                     <td class="py-3">
                                         @if($topup->status === 'pending')

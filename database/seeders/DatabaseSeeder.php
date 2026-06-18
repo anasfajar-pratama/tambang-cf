@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             ProjectSeeder::class,
             LandingPageContentSeeder::class,
             LenderWalletSeeder::class,
+            InvestmentSimulationSeeder::class,
         ]);
     }
 }

@@ -53,7 +53,11 @@ class ProfitDistributionController extends Controller
             $ratio = $investment->amount / $totalInvested;
             $profitAmount = $validated['total_profit'] * $ratio;
 
-            $investment->lender->lenderWallet?->increment('total_profit', $profitAmount);
+            $wallet = $investment->lender->lenderWallet;
+            if ($wallet) {
+                $wallet->increment('balance', $profitAmount);
+                $wallet->increment('total_profit', $profitAmount);
+            }
 
             ProfitDistribution::create([
                 'project_id' => $project->id,

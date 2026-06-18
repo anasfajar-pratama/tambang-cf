@@ -18,6 +18,7 @@
                         <tr class="text-gray-400 border-b border-gray-700 bg-dark-primary/50">
                             <th class="text-left py-3 px-4 font-medium">Lender</th>
                             <th class="text-right py-3 px-4 font-medium">Jumlah</th>
+                            <th class="text-left py-3 px-4 font-medium">Bank</th>
                             <th class="text-left py-3 px-4 font-medium">Status</th>
                             <th class="text-left py-3 px-4 font-medium">Tanggal</th>
                             <th class="text-center py-3 px-4 font-medium">Aksi</th>
@@ -28,11 +29,18 @@
                             <tr class="border-b border-gray-800 hover:bg-dark-primary/30 transition-colors">
                                 <td class="py-3 px-4">
                                     <div class="flex items-center space-x-3">
-                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gold to-emerald flex items-center justify-center text-xs font-bold text-white">{{ substr($topup->user->name ?? '?', 0, 1) }}</div>
-                                        <span class="text-gray-200">{{ $topup->user->name ?? '-' }}</span>
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gold to-emerald flex items-center justify-center text-xs font-bold text-white">{{ substr($topup->lender->name ?? '?', 0, 1) }}</div>
+                                        <span class="text-gray-200">{{ $topup->lender->name ?? '-' }}</span>
                                     </div>
                                 </td>
                                 <td class="py-3 px-4 text-right text-gray-200 font-semibold">Rp {{ number_format($topup->amount ?? 0, 0, ',', '.') }}</td>
+                                <td class="py-3 px-4">
+                                    @if($topup->bank_name)
+                                        <span class="text-gray-200 text-xs">{{ $topup->bank_name }} - {{ $topup->account_holder }}</span>
+                                    @else
+                                        <span class="text-gray-500 text-xs">-</span>
+                                    @endif
+                                </td>
                                 <td class="py-3 px-4">
                                     @if($topup->status === 'pending')
                                         <span class="px-2 py-0.5 bg-yellow-900/50 text-yellow-400 text-xs rounded-full border border-yellow-600/50">Pending</span>
@@ -42,31 +50,46 @@
                                         <span class="px-2 py-0.5 bg-red-900/50 text-red-400 text-xs rounded-full border border-red-600/50">Ditolak</span>
                                     @endif
                                 </td>
-                                <td class="py-3 px-4 text-gray-400">{{ $topup->created_at ? $topup->created_at->format('d M Y H:i') : '-' }}</td>
+                                <td class="py-3 px-4 text-gray-400 text-xs">{{ $topup->created_at ? $topup->created_at->format('d M Y H:i') : '-' }}</td>
                                 <td class="py-3 px-4">
                                     @if($topup->status === 'pending')
-                                        <div class="flex items-center justify-center space-x-2">
-                                            <form method="POST" action="{{ route('admin.topups.approve', $topup) }}" class="inline">
-                                                @csrf
-                                                <button type="submit" class="px-3 py-1 bg-emerald-900/50 text-emerald text-xs rounded-lg border border-emerald-600/50 hover:bg-emerald-900/70 transition-all">Setujui</button>
-                                            </form>
-                                            <form method="POST" action="{{ route('admin.topups.reject', $topup) }}" class="inline">
-                                                @csrf
-                                                <button type="submit" class="px-3 py-1 bg-red-900/50 text-red-400 text-xs rounded-lg border border-red-600/50 hover:bg-red-900/70 transition-all">Tolak</button>
-                                            </form>
+                                        <div class="flex flex-col items-center space-y-1">
+                                            @if($topup->proof_image)
+                                                <a href="{{ asset('storage/' . $topup->proof_image) }}" target="_blank" class="text-xs text-gold hover:text-gold-light underline">Lihat Bukti</a>
+                                            @endif
+                                            @if($topup->bank_name)
+                                                <span class="text-xs text-gray-500">{{ $topup->bank_name }} a/n {{ $topup->account_holder }}</span>
+                                            @endif
+                                            <div class="flex items-center space-x-2 mt-1">
+                                                <form method="POST" action="{{ route('admin.topups.approve', $topup) }}" class="inline">
+                                                    @csrf
+                                                    <button type="submit" class="px-3 py-1 bg-emerald-900/50 text-emerald text-xs rounded-lg border border-emerald-600/50 hover:bg-emerald-900/70 transition-all">Setujui</button>
+                                                </form>
+                                                <form method="POST" action="{{ route('admin.topups.reject', $topup) }}" class="inline">
+                                                    @csrf
+                                                    <button type="submit" class="px-3 py-1 bg-red-900/50 text-red-400 text-xs rounded-lg border border-red-600/50 hover:bg-red-900/70 transition-all">Tolak</button>
+                                                </form>
+                                            </div>
                                         </div>
                                     @else
-                                        <span class="text-gray-500 text-xs">-</span>
+                                        <div class="text-center space-y-1">
+                                            @if($topup->proof_image)
+                                                <a href="{{ asset('storage/' . $topup->proof_image) }}" target="_blank" class="text-xs text-gold hover:text-gold-light underline">Lihat Bukti</a>
+                                            @endif
+                                            @if($topup->admin)
+                                                <p class="text-xs text-gray-500">oleh: {{ $topup->admin->name }}</p>
+                                            @endif
+                                        </div>
                                     @endif
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="py-10 text-center text-gray-500">Belum ada top up</td></tr>
+                            <tr><td colspan="6" class="py-10 text-center text-gray-500">Belum ada top up</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-            @if(isset($topups) && $topups->hasPages())
+            @if($topups->hasPages())
                 <div class="p-4 border-t border-gray-700">{{ $topups->links() }}</div>
             @endif
         </div>

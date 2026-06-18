@@ -11,10 +11,15 @@ class TopupController extends Controller
 {
     public function index(): View
     {
-        $topups = Topup::with('lender', 'admin')
-            ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')")
-            ->latest()
-            ->paginate(15);
+        $status = request('status');
+        $query = Topup::with('lender', 'admin')
+            ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected')");
+
+        if ($status && in_array($status, ['pending', 'approved', 'rejected'])) {
+            $query->where('status', $status);
+        }
+
+        $topups = $query->latest()->paginate(15);
 
         return view('admin.topups.index', compact('topups'));
     }

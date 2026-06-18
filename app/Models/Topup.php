@@ -14,6 +14,10 @@ class Topup extends Model
     protected $fillable = [
         'lender_id',
         'amount',
+        'bank_name',
+        'account_holder',
+        'proof_image',
+        'transfered_at',
         'status',
         'admin_id',
         'notes',
@@ -23,6 +27,8 @@ class Topup extends Model
     {
         return [
             'status' => 'string',
+            'amount' => 'decimal:2',
+            'transfered_at' => 'datetime',
         ];
     }
 

@@ -12,24 +12,18 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-        $totalUsers = User::count();
-        $totalAdmins = User::where('role', 'admin')->count();
-        $totalVendors = User::where('role', 'vendor')->count();
-        $totalLenders = User::where('role', 'lender')->count();
-        $totalProjects = Project::count();
-        $totalInvestments = Investment::sum('amount');
-        $totalTopups = Topup::where('status', 'approved')->sum('amount');
-        $pendingTopups = Topup::where('status', 'pending')->count();
+        $stats = [
+            'total_users' => User::count(),
+            'total_vendors' => User::where('role', 'vendor')->count(),
+            'total_lenders' => User::where('role', 'lender')->count(),
+            'total_projects' => Project::count(),
+            'active_fundraising' => Project::where('status', 'fundraising')->count(),
+            'pending_topups' => Topup::where('status', 'pending')->count(),
+        ];
 
-        return view('admin.dashboard', compact(
-            'totalUsers',
-            'totalAdmins',
-            'totalVendors',
-            'totalLenders',
-            'totalProjects',
-            'totalInvestments',
-            'totalTopups',
-            'pendingTopups'
-        ));
+        $recentProjects = Project::with('vendor')->latest()->take(5)->get();
+        $recentTopups = Topup::with('lender', 'admin')->latest()->take(5)->get();
+
+        return view('admin.dashboard', compact('stats', 'recentProjects', 'recentTopups'));
     }
 }

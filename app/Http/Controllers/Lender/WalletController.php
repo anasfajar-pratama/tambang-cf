@@ -22,15 +22,28 @@ class WalletController extends Controller
     {
         $validated = $request->validate([
             'amount' => 'required|numeric|min:10000',
+            'bank_name' => 'required|string|max:255',
+            'account_holder' => 'required|string|max:255',
+            'transfered_at' => 'required|date',
+            'proof_image' => 'nullable|image|max:2048',
             'notes' => 'nullable|string|max:255',
         ]);
 
-        Topup::create([
+        $data = [
             'lender_id' => auth()->id(),
             'amount' => $validated['amount'],
+            'bank_name' => $validated['bank_name'],
+            'account_holder' => $validated['account_holder'],
+            'transfered_at' => $validated['transfered_at'],
             'notes' => $validated['notes'] ?? null,
             'status' => 'pending',
-        ]);
+        ];
+
+        if ($request->hasFile('proof_image')) {
+            $data['proof_image'] = $request->file('proof_image')->store('topups/proof', 'public');
+        }
+
+        Topup::create($data);
 
         return redirect()->route('lender.wallet.index')
             ->with('success', 'Permintaan topup berhasil dikirim.');

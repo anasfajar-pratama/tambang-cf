@@ -26,7 +26,7 @@
                             </a>
                         </div>
 
-                        <div class="flex-1 flex items-center justify-end md:space-x-6">
+                        <div class="flex-1 flex items-center justify-end md:gap-6">
                             <a href="{{ url('/') }}" class="text-sm font-medium text-gray-300 hover:text-gold transition-colors">Beranda</a>
                             <a href="{{ route('projects.index') }}" class="text-sm font-medium text-gray-300 hover:text-gold transition-colors">Proyek</a>
                             @auth
@@ -38,9 +38,8 @@
                                     <a href="{{ route('lender.dashboard') }}" class="text-sm font-medium text-gray-300 hover:text-gold transition-colors">Dashboard</a>
                                 @endif
                             @endauth
-                        </div>
-
-                        <div class="hidden md:flex items-center space-x-4">
+                            <span class="w-8"></span>
+                            <div class="hidden md:flex items-center space-x-4">
                             @auth
                                 <x-dropdown align="right" width="48" contentClasses="py-1 bg-dark-card border border-gray-700">
                                     <x-slot name="trigger">

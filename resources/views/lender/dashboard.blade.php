@@ -12,7 +12,7 @@
                     <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                 </div>
                 <p class="text-2xl font-bold text-blue-400">Rp {{ number_format($totalAsset, 0, ',', '.') }}</p>
-                <p class="text-xs text-gray-500 mt-2">Total seluruh saldo yang pernah di-topup</p>
+                <p class="text-xs text-gray-500 mt-2">Saldo tersedia + total investasi</p>
             </div>
             <div class="bg-dark-card border border-gray-700 rounded-xl p-6">
                 <div class="flex items-center justify-between mb-2">

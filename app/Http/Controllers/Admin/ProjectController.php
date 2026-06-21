@@ -85,7 +85,26 @@ class ProjectController extends Controller
     {
         $vendors = Vendor::with('user')->where('is_verified', true)->get();
         $project->load(['galleries', 'milestones', 'documents', 'faqs']);
-        return view('admin.projects.edit', compact('project', 'vendors'));
+
+        $milestonesJson = $project->milestones->map(fn($m) => [
+            'phase_name' => $m->phase_name,
+            'description' => $m->description,
+            'target_date' => $m->target_date ? $m->target_date->format('Y-m-d') : '',
+            'is_completed' => (bool) $m->is_completed,
+        ]);
+
+        $faqsJson = $project->faqs->map(fn($f) => [
+            'question' => $f->question,
+            'answer' => $f->answer,
+        ]);
+
+        $existingGalleriesJson = $project->galleries->map(fn($g) => [
+            'id' => $g->id,
+            'url' => asset('storage/' . $g->image),
+            'caption' => $g->caption,
+        ]);
+
+        return view('admin.projects.edit', compact('project', 'vendors', 'milestonesJson', 'faqsJson', 'existingGalleriesJson'));
     }
 
     public function update(Request $request, Project $project): RedirectResponse

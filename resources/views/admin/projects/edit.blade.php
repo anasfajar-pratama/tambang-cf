@@ -7,11 +7,11 @@
 
         <form method="POST" action="{{ route('admin.projects.update', $project) }}" enctype="multipart/form-data" class="bg-dark-card border border-gray-700 rounded-xl p-6 space-y-6"
               x-data="{
-                  milestones: @json($project->milestones->map(fn($m) => ['phase_name' => $m->phase_name, 'description' => $m->description, 'target_date' => $m->target_date ? \Carbon\Carbon::parse($m->target_date)->format('Y-m-d') : '', 'is_completed' => $m->is_completed])),
-                  faqs: @json($project->faqs->map(fn($f) => ['question' => $f->question, 'answer' => $f->answer])),
+                  milestones: {{ Illuminate\Support\Js::from($milestonesJson) }},
+                  faqs: {{ Illuminate\Support\Js::from($faqsJson) }},
                   newGalleries: [],
                   newDocuments: [],
-                  existingGalleries: @json($project->galleries->map(fn($g) => ['id' => $g->id, 'url' => asset('storage/'.$g->image), 'caption' => $g->caption])),
+                  existingGalleries: {{ Illuminate\Support\Js::from($existingGalleriesJson) }},
                   removeGalleryIds: [],
                   removeDocIds: []
               }">
@@ -33,7 +33,7 @@
                     <select id="vendor_id" name="vendor_id" class="w-full bg-dark-primary border border-gray-700 text-gray-200 rounded-lg px-4 py-2.5 focus:border-gold focus:ring-gold/20" required>
                         <option value="">Pilih Vendor</option>
                         @foreach($vendors as $vendor)
-                            <option value="{{ $vendor->id }}" {{ old('vendor_id', $project->vendor_id) == $vendor->id ? 'selected' : '' }}>{{ $vendor->name }}</option>
+                            <option value="{{ $vendor->id }}" {{ old('vendor_id', $project->vendor_id) == $vendor->id ? 'selected' : '' }}>{{ $vendor->company_name ?? $vendor->user?->name }}</option>
                         @endforeach
                     </select>
                     <x-input-error class="mt-2" :messages="$errors->get('vendor_id')" />

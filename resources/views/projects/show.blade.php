@@ -41,7 +41,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-400 mb-1">Sisa Waktu</p>
-                    <p class="text-xl font-bold text-gold">{{ $project->days_remaining ?? '-' }} Hari</p>
+                    <p class="text-xl font-bold text-gold">{{ $project->duration_months ?? '-' }} Bulan</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-400 mb-1">Progress</p>
@@ -71,7 +71,7 @@
                         </div>
                         <div class="p-3 bg-dark-primary rounded-lg">
                             <p class="text-xs text-gray-500">Luas Lahan</p>
-                            <p class="text-sm font-semibold text-gray-200">{{ $project->land_area ?? '-' }}</p>
+                            <p class="text-sm font-semibold text-gray-200">{{ $project->luas_lahan ?? '-' }}</p>
                         </div>
                         <div class="p-3 bg-dark-primary rounded-lg">
                             <p class="text-xs text-gray-500">Izin Usaha</p>
@@ -83,7 +83,7 @@
                         </div>
                         <div class="p-3 bg-dark-primary rounded-lg">
                             <p class="text-xs text-gray-500">Durasi</p>
-                            <p class="text-sm font-semibold text-gray-200">{{ $project->duration ?? '-' }}</p>
+                            <p class="text-sm font-semibold text-gray-200">{{ $project->duration_months ?? '-' }} bulan</p>
                         </div>
                     </div>
                 </div>
@@ -131,12 +131,12 @@
                                 <div class="relative pl-10">
                                     <div class="absolute left-2.5 top-1.5 w-3 h-3 rounded-full {{ $milestone->is_completed ? 'bg-emerald' : 'bg-gray-600' }} border-2 border-dark-card"></div>
                                     <div>
-                                        <h4 class="font-semibold text-gray-200">{{ $milestone->title }}</h4>
+                                        <h4 class="font-semibold text-gray-200">{{ $milestone->phase_name }}</h4>
                                         @if($milestone->description)
                                             <p class="text-sm text-gray-400">{{ $milestone->description }}</p>
                                         @endif
-                                        @if($milestone->date)
-                                            <p class="text-xs text-gray-500 mt-1">{{ \Carbon\Carbon::parse($milestone->date)->format('d M Y') }}</p>
+                                        @if($milestone->target_date)
+                                            <p class="text-xs text-gray-500 mt-1">{{ \Carbon\Carbon::parse($milestone->target_date)->format('d M Y') }}</p>
                                         @endif
                                     </div>
                                 </div>
@@ -147,13 +147,13 @@
                 @endif
 
                 {{-- Gallery --}}
-                @if(isset($project->gallery) && $project->gallery->count() > 0)
+                @if(isset($project->galleries) && $project->galleries->count() > 0)
                 <div class="bg-dark-card border border-gray-700 rounded-xl p-6">
                     <h2 class="text-xl font-bold text-white mb-4">Galeri</h2>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        @foreach($project->gallery as $image)
+                        @foreach($project->galleries as $image)
                             <div class="aspect-video rounded-lg overflow-hidden bg-dark-primary">
-                                <img src="{{ asset('storage/' . $image->path) }}" alt="{{ $image->caption ?? '' }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
+                                <img src="{{ asset('storage/' . $image->image) }}" alt="{{ $image->caption ?? '' }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300">
                             </div>
                         @endforeach
                     </div>
@@ -169,10 +169,8 @@
                             <a href="{{ asset('storage/' . $document->file) }}" target="_blank" class="flex items-center p-3 bg-dark-primary rounded-lg hover:border-gold/50 border border-transparent transition-all">
                                 <svg class="w-8 h-8 text-gold mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                 <div class="flex-1">
-                                    <p class="text-sm font-medium text-gray-200">{{ $document->title }}</p>
-                                    @if($document->description)
-                                        <p class="text-xs text-gray-500">{{ $document->description }}</p>
-                                    @endif
+                                    <p class="text-sm font-medium text-gray-200">{{ $document->name }}</p>
+                                    <p class="text-xs text-gray-500">{{ ucfirst($document->type) }}</p>
                                 </div>
                                 <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                             </a>
@@ -200,6 +198,7 @@
                     </div>
                 </div>
                 @endif
+                <br><br><br><br><br>
             </div>
 
             <div class="space-y-6">
@@ -209,35 +208,76 @@
                     <h2 class="text-lg font-bold text-white mb-4">Vendor</h2>
                     <div class="flex items-center space-x-3 mb-4">
                         <div class="w-12 h-12 rounded-full bg-gradient-to-br from-gold to-emerald flex items-center justify-center text-lg font-bold text-white">
-                            {{ substr($project->vendor->name, 0, 1) }}
-                        </div>
-                        <div>
-                            <p class="font-semibold text-gray-200">{{ $project->vendor->name }}</p>
-                            @if($project->vendor->company)
-                                <p class="text-sm text-gray-400">{{ $project->vendor->company }}</p>
-                            @endif
-                        </div>
-                    </div>
-                    @if($project->vendor->bio)
-                        <p class="text-sm text-gray-400">{{ $project->vendor->bio }}</p>
-                    @endif
+                             {{ substr($project->vendor->company_name ?? $project->vendor->user?->name ?? 'V', 0, 1) }}
+                         </div>
+                         <div>
+                             <p class="font-semibold text-gray-200">{{ $project->vendor->company_name ?? $project->vendor->user?->name ?? 'Vendor' }}</p>
+                             @if($project->vendor->company_name)
+                                 <p class="text-sm text-gray-400">{{ $project->vendor->company_name }}</p>
+                             @endif
+                         </div>
+                     </div>
+                     @if($project->vendor->description)
+                         <p class="text-sm text-gray-400">{{ $project->vendor->description }}</p>
+                     @endif
                 </div>
                 @endif
 
                 {{-- Invest Form --}}
-                @if($project->status === 'fundraising' && auth()->check() && auth()->user()->role === 'lender')
-                <div class="bg-dark-card border border-gray-700 rounded-xl p-6 sticky top-8">
+                @php
+                    $remainingSlot = $project->total_capital - $project->collected_capital;
+                @endphp
+                @if($project->status === 'fundraising' && auth()->check() && auth()->user()->role === 'lender' && $remainingSlot > 0)
+                <div class="bg-dark-card border border-gray-700 rounded-xl p-6 sticky top-8" x-data="{ open: false, amount: 0 }">
                     <h2 class="text-lg font-bold text-white mb-4">Investasi Sekarang</h2>
-                    <form method="POST" action="{{ route('investments.store', $project) }}" class="space-y-4">
+                    <form method="POST" action="{{ route('lender.investments.create', $project) }}" class="space-y-4" @submit.prevent="amount = document.getElementById('amount').value; if(amount && amount > 0) { open = true; } else { $event.target.submit(); }">
                         @csrf
                         <div>
                             <label for="amount" class="block text-sm font-medium text-gray-300 mb-1">Jumlah Investasi (Rp)</label>
-                            <input type="number" id="amount" name="amount" class="w-full bg-dark-primary border border-gray-700 text-gray-200 rounded-lg px-4 py-2.5 focus:border-gold focus:ring-gold/20" placeholder="Min. Rp {{ number_format($project->min_investment ?? 0, 0, ',', '.') }}" min="{{ $project->min_investment ?? 0 }}" required>
+                            <input type="number" id="amount" name="amount" class="w-full bg-dark-primary border border-gray-700 text-gray-200 rounded-lg px-4 py-2.5 focus:border-gold focus:ring-gold/20" placeholder="Min. Rp {{ number_format($project->min_investment ?? 0, 0, ',', '.') }}" min="{{ $project->min_investment ?? 0 }}" max="{{ $remainingSlot }}" required>
                             <x-input-error class="mt-2" :messages="$errors->get('amount')" />
                         </div>
-                        <p class="text-xs text-gray-500">Saldo Anda: Rp {{ number_format(auth()->user()->wallet->balance ?? 0, 0, ',', '.') }}</p>
+                        <div class="space-y-1">
+                            <p class="text-xs text-gray-500">Saldo Anda: Rp {{ number_format(auth()->user()->lenderWallet->balance ?? 0, 0, ',', '.') }}</p>
+                            <p class="text-xs text-gray-500">Sisa slot: Rp {{ number_format(max($remainingSlot, 0), 0, ',', '.') }}</p>
+                        </div>
                         <button type="submit" class="w-full px-6 py-3 bg-gradient-to-r from-gold to-gold-light text-dark-primary font-bold rounded-lg hover:from-gold-light hover:to-gold transition-all">Investasi Sekarang</button>
                     </form>
+
+                    {{-- Confirmation Modal --}}
+                    <div x-cloak x-show="open" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+                        <div class="fixed inset-0 bg-black/60" @click="open = false"></div>
+                        <div class="relative bg-dark-card border border-gray-700 rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="scale-95 opacity-0" x-transition:enter-end="scale-100 opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="scale-100 opacity-100" x-transition:leave-end="scale-95 opacity-0">
+                            <div class="text-center mb-6">
+                                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gold/20 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                </div>
+                                <h3 class="text-xl font-bold text-white">Konfirmasi Investasi</h3>
+                                <p class="text-gray-400 mt-2">Anda akan menginvestasikan sebesar</p>
+                                <p class="text-3xl font-extrabold text-gold mt-2" x-text="'Rp ' + new Intl.NumberFormat('id-ID').format(amount)"></p>
+                            </div>
+                            <div class="bg-dark-primary rounded-lg p-4 space-y-2 mb-6 text-sm">
+                                <div class="flex justify-between"><span class="text-gray-400">Proyek</span><span class="text-gray-200 font-medium">{{ $project->title }}</span></div>
+                                <div class="flex justify-between"><span class="text-gray-400">Sisa slot</span><span class="text-gray-200 font-medium">Rp {{ number_format(max($remainingSlot, 0), 0, ',', '.') }}</span></div>
+                                <div class="flex justify-between"><span class="text-gray-400">Saldo Anda</span><span class="text-gray-200 font-medium">Rp {{ number_format(auth()->user()->lenderWallet->balance ?? 0, 0, ',', '.') }}</span></div>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button type="button" @click="open = false" class="flex-1 px-4 py-2.5 border border-gray-600 text-gray-300 rounded-lg hover:border-gold hover:text-gold transition-all">Batal</button>
+                                <button type="button" @click="open = false; $el.closest('form').submit()" class="flex-1 px-4 py-2.5 bg-gradient-to-r from-gold to-gold-light text-dark-primary font-bold rounded-lg hover:from-gold-light hover:to-gold transition-all">Ya, Investasi</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @elseif($project->status === 'fundraising' && auth()->check() && auth()->user()->role === 'lender' && $remainingSlot <= 0)
+                <div class="bg-dark-card border border-gray-700 rounded-xl p-6 sticky top-8 text-center">
+                    <svg class="w-14 h-14 mx-auto text-emerald mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <h3 class="text-lg font-bold text-white mb-2">Proyek Sudah Penuh</h3>
+                    <p class="text-sm text-gray-400 mb-4">Seluruh slot investasi untuk proyek ini sudah terisi penuh. Terima kasih atas minat Anda.</p>
+                    <div class="bg-dark-primary rounded-lg p-3">
+                        <p class="text-xs text-gray-500">Total Terkumpul</p>
+                        <p class="text-lg font-bold text-emerald">Rp {{ number_format($project->collected_capital, 0, ',', '.') }}</p>
+                        <p class="text-xs text-gray-500 mt-1">dari Rp {{ number_format($project->total_capital, 0, ',', '.') }}</p>
+                    </div>
                 </div>
                 @elseif(!auth()->check())
                 <div class="bg-dark-card border border-gray-700 rounded-xl p-6 text-center sticky top-8">

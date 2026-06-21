@@ -11,6 +11,8 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <style>[x-cloak] { display: none !important; }</style>
     </head>
     <body class="font-sans antialiased bg-dark-primary text-gray-100">
         <div class="min-h-screen">

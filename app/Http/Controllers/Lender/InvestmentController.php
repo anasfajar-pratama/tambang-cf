@@ -29,11 +29,19 @@ class InvestmentController extends Controller
         }
 
         $investment->load([
-            'project',
+            'project.vendor.user',
             'profitDistributions' => fn($q) => $q->latest(),
         ]);
 
-        return view('lender.investments.show', compact('investment'));
+        $project = $investment->project;
+        $project->load([
+            'vendor.user',
+            'investments' => fn($q) => $q->with('lender')->latest(),
+        ]);
+
+        $totalCollected = $project->collected_capital;
+
+        return view('lender.investments.show', compact('investment', 'project', 'totalCollected'));
     }
 
     public function invest(Request $request, Project $project): RedirectResponse
@@ -46,6 +54,14 @@ class InvestmentController extends Controller
         $validated = $request->validate([
             'amount' => 'required|numeric|min:' . $project->min_investment,
         ]);
+
+        $currentCollected = $project->collected_capital;
+        $remaining = $project->total_capital - $currentCollected;
+
+        if ($validated['amount'] > $remaining) {
+            return redirect()->route('projects.show', $project)
+                ->with('error', 'Investasi melebihi sisa slot yang tersedia. Sisa slot: Rp ' . number_format($remaining, 0, ',', '.'));
+        }
 
         $wallet = auth()->user()->lenderWallet;
 
@@ -71,6 +87,10 @@ class InvestmentController extends Controller
             'amount' => $validated['amount'],
             'invested_at' => now(),
         ]);
+
+        if ($project->fresh()->collected_capital >= $project->total_capital) {
+            $project->update(['status' => 'in_progress']);
+        }
 
         return redirect()->route('lender.investments.index')
             ->with('success', 'Investasi berhasil dilakukan.');

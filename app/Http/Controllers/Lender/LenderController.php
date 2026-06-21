@@ -24,7 +24,7 @@ class LenderController extends Controller
             ]);
         }
 
-        $totalAsset = $user->topups()->where('status', 'approved')->sum('amount') ?? 0;
+        $totalAsset = ($wallet->balance ?? 0) + ($wallet->total_invested ?? 0);
         $walletBalance = $wallet->balance;
         $totalInvested = $user->investments()
             ->whereHas('project', fn($q) => $q->whereIn('status', ['fundraising', 'in_progress']))

@@ -55,7 +55,7 @@ class PublicController extends Controller
     public function projectDetail(Project $project)
     {
         $project->load([
-            'vendor',
+            'vendor.user',
             'galleries',
             'milestones' => fn($q) => $q->orderBy('order'),
             'documents',

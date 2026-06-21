@@ -38,25 +38,25 @@ class InvestmentSimulationSeeder extends Seeder
             }
 
             // Create profit distribution (10% profit)
-            $investments = $project->investments;
-            $totalInvested = $investments->sum('amount');
-            $profitAmount = $totalInvested * 0.10;
+            // $investments = $project->investments;
+            // $totalInvested = $investments->sum('amount');
+            // $profitAmount = $totalInvested * 0.10;
 
-            foreach ($investments as $investment) {
-                $ratio = $investment->amount / $totalInvested;
-                $share = $profitAmount * $ratio;
+            // foreach ($investments as $investment) {
+            //     $ratio = $investment->amount / $totalInvested;
+            //     $share = $profitAmount * $ratio;
 
-                $investment->lender->lenderWallet?->increment('balance', $share);
-                $investment->lender->lenderWallet?->increment('total_profit', $share);
+            //     $investment->lender->lenderWallet?->increment('balance', $share);
+            //     $investment->lender->lenderWallet?->increment('total_profit', $share);
 
-                ProfitDistribution::create([
-                    'project_id' => $project->id,
-                    'investment_id' => $investment->id,
-                    'amount' => $share,
-                    'type' => 'profit',
-                    'distributed_at' => Carbon::now(),
-                ]);
-            }
+            //     ProfitDistribution::create([
+            //         'project_id' => $project->id,
+            //         'investment_id' => $investment->id,
+            //         'amount' => $share,
+            //         'type' => 'profit',
+            //         'distributed_at' => Carbon::now(),
+            //     ]);
+            // }
         }
     }
 }

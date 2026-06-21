@@ -22,11 +22,11 @@
                     <div class="flex justify-between"><dt class="text-gray-400">Vendor</dt><dd class="text-gray-200">{{ $project->vendor->name ?? '-' }}</dd></div>
                     <div class="flex justify-between"><dt class="text-gray-400">Lokasi</dt><dd class="text-gray-200">{{ $project->location ?? '-' }}</dd></div>
                     <div class="flex justify-between"><dt class="text-gray-400">Tipe Tambang</dt><dd class="text-gray-200">{{ $project->mining_type ?? '-' }}</dd></div>
-                    <div class="flex justify-between"><dt class="text-gray-400">Tipe Investasi</dt><dd class="text-gray-200">{{ $project->investment_type === 'equity' ? 'Ekuitas' : 'Pendanaan' }}</dd></div>
-                    <div class="flex justify-between"><dt class="text-gray-400">Luas Lahan</dt><dd class="text-gray-200">{{ $project->land_area ?? '-' }}</dd></div>
+                    <div class="flex justify-between"><dt class="text-gray-400">Tipe Investasi</dt><dd class="text-gray-200">{{ $project->investment_type === 'single' ? 'Investor Tunggal' : 'Multi Investor' }}</dd></div>
+                    <div class="flex justify-between"><dt class="text-gray-400">Luas Lahan</dt><dd class="text-gray-200">{{ $project->luas_lahan ?? '-' }}</dd></div>
                     <div class="flex justify-between"><dt class="text-gray-400">Izin</dt><dd class="text-gray-200">{{ $project->permit_status ?? '-' }}</dd></div>
                     <div class="flex justify-between"><dt class="text-gray-400">Risiko</dt><dd class="text-gray-200">{{ $project->risk_level ?? '-' }}</dd></div>
-                    <div class="flex justify-between"><dt class="text-gray-400">Durasi</dt><dd class="text-gray-200">{{ $project->duration ?? '-' }}</dd></div>
+                    <div class="flex justify-between"><dt class="text-gray-400">Durasi</dt><dd class="text-gray-200">{{ $project->duration_months ?? '-' }} bulan</dd></div>
                 </dl>
             </div>
             <div class="bg-dark-card border border-gray-700 rounded-xl p-6">
@@ -43,7 +43,7 @@
                             </div>
                         </dd>
                     </div>
-                    <div class="flex justify-between"><dt class="text-gray-400">Bagi Hasil</dt><dd class="text-gray-200 text-sm">V:{{ $project->profit_sharing_vendor ?? 0 }}% / I:{{ $project->profit_sharing_investor ?? 0 }}% / P:{{ $project->profit_sharing_platform ?? 0 }}%</dd></div>
+                    <div class="flex justify-between"><dt class="text-gray-400">Bagi Hasil</dt><dd class="text-gray-200 text-sm">Vendor: {{ $project->vendor_share ?? 0 }}% / Investor: {{ $project->investor_share ?? 0 }}%</dd></div>
                 </dl>
             </div>
         </div>
@@ -52,6 +52,73 @@
         <div class="bg-dark-card border border-gray-700 rounded-xl p-6">
             <h2 class="text-lg font-bold text-white mb-4">Deskripsi</h2>
             <p class="text-gray-300 leading-relaxed">{{ $project->description }}</p>
+        </div>
+        @endif
+
+        @if($project->galleries->count() > 0)
+        <div class="bg-dark-card border border-gray-700 rounded-xl p-6">
+            <h2 class="text-lg font-bold text-white mb-4">Galeri</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                @foreach($project->galleries as $gallery)
+                    <div class="aspect-video rounded-lg overflow-hidden bg-dark-primary">
+                        <img src="{{ asset('storage/' . $gallery->image) }}" alt="{{ $gallery->caption ?? '' }}" class="w-full h-full object-cover">
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        @if($project->milestones->count() > 0)
+        <div class="bg-dark-card border border-gray-700 rounded-xl p-6">
+            <h2 class="text-lg font-bold text-white mb-4">Pencapaian</h2>
+            <div class="relative">
+                <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-700"></div>
+                @foreach($project->milestones as $milestone)
+                    <div class="relative pl-10 mb-6">
+                        <div class="absolute left-2.5 top-1.5 w-3 h-3 rounded-full {{ $milestone->is_completed ? 'bg-emerald' : 'bg-gray-600' }} border-2 border-dark-card"></div>
+                        <h4 class="font-semibold text-gray-200">{{ $milestone->phase_name }}</h4>
+                        @if($milestone->description)<p class="text-sm text-gray-400">{{ $milestone->description }}</p>@endif
+                        @if($milestone->target_date)<p class="text-xs text-gray-500 mt-1">{{ \Carbon\Carbon::parse($milestone->target_date)->format('d M Y') }}</p>@endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        @if($project->documents->count() > 0)
+        <div class="bg-dark-card border border-gray-700 rounded-xl p-6">
+            <h2 class="text-lg font-bold text-white mb-4">Dokumen</h2>
+            <div class="space-y-3">
+                @foreach($project->documents as $doc)
+                    <a href="{{ asset('storage/' . $doc->file) }}" target="_blank" class="flex items-center p-3 bg-dark-primary rounded-lg hover:border-gold/50 border border-transparent transition-all">
+                        <svg class="w-8 h-8 text-gold mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-200">{{ $doc->name }}</p>
+                            <p class="text-xs text-gray-500">{{ ucfirst($doc->type) }}</p>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        @if($project->faqs->count() > 0)
+        <div class="bg-dark-card border border-gray-700 rounded-xl p-6">
+            <h2 class="text-lg font-bold text-white mb-4">FAQ</h2>
+            <div class="space-y-3" x-data="{ active: null }">
+                @foreach($project->faqs as $index => $faq)
+                    <div class="bg-dark-primary rounded-lg overflow-hidden border border-gray-700">
+                        <button @click="active = active === {{ $index }} ? null : {{ $index }}" class="w-full flex items-center justify-between p-4 text-left">
+                            <span class="font-medium text-gray-200">{{ $faq->question }}</span>
+                            <svg class="w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ml-2" :class="active === {{ $index }} ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="active === {{ $index }}" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="border-t border-gray-700">
+                            <p class="p-4 text-sm text-gray-400">{{ $faq->answer }}</p>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
         </div>
         @endif
     </div>

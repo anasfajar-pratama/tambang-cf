@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use App\Models\ProjectDocument;
+use App\Models\ProjectFaq;
+use App\Models\ProjectGallery;
+use App\Models\ProjectMilestone;
 use App\Models\Vendor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,11 +45,11 @@ class ProjectController extends Controller
             'mining_type' => 'nullable|string|max:255',
             'total_capital' => 'required|numeric|min:0',
             'min_investment' => 'required|numeric|min:0',
-            'investment_type' => 'required|in:single,multiple',
+            'investment_type' => 'required|in:single,multi',
             'investor_share' => 'required|numeric|min:0|max:100',
             'vendor_share' => 'required|numeric|min:0|max:100',
             'duration_months' => 'required|integer|min:1',
-            'risk_level' => 'required|in:low,medium,high',
+            'risk_level' => 'required|in:rendah,sedang,tinggi',
             'permit_status' => 'nullable|string|max:255',
             'luas_lahan' => 'nullable|string|max:255',
             'status' => 'required|in:draft,pending,fundraising,in_progress,completed,rejected',
@@ -66,7 +70,12 @@ class ProjectController extends Controller
             $validated['cover_image'] = $request->file('cover_image')->store('projects/covers', 'public');
         }
 
-        Project::create($validated);
+        $project = Project::create($validated);
+
+        $this->syncGalleries($request, $project);
+        $this->syncMilestones($request, $project);
+        $this->syncDocuments($request, $project);
+        $this->syncFaqs($request, $project);
 
         return redirect()->route('admin.projects.index')
             ->with('success', 'Proyek berhasil dibuat.');
@@ -75,6 +84,7 @@ class ProjectController extends Controller
     public function edit(Project $project): View
     {
         $vendors = Vendor::with('user')->where('is_verified', true)->get();
+        $project->load(['galleries', 'milestones', 'documents', 'faqs']);
         return view('admin.projects.edit', compact('project', 'vendors'));
     }
 
@@ -96,7 +106,7 @@ class ProjectController extends Controller
             'risk_level' => 'required|in:rendah,sedang,tinggi',
             'permit_status' => 'nullable|string|max:255',
             'luas_lahan' => 'nullable|string|max:255',
-            'status' => 'required|in:draft,pending,fundraising,in_progress,completed,failed',
+            'status' => 'required|in:draft,pending,fundraising,in_progress,completed,rejected',
             'cover_image' => 'nullable|image|max:2048',
             'started_at' => 'nullable|date',
             'ended_at' => 'nullable|date',
@@ -118,8 +128,35 @@ class ProjectController extends Controller
 
         $project->update($validated);
 
+        $this->syncGalleries($request, $project);
+        $this->syncMilestones($request, $project);
+        $this->syncDocuments($request, $project);
+        $this->syncFaqs($request, $project);
+
         return redirect()->route('admin.projects.index')
             ->with('success', 'Proyek berhasil diperbarui.');
+    }
+
+    public function investors(Project $project): View
+    {
+        $project->load('vendor');
+        $investments = $project->investments()
+            ->with('lender')
+            ->latest()
+            ->get();
+
+        $totalCollected = $investments->sum('amount');
+
+        $investments->each(function ($inv) use ($totalCollected, $project) {
+            $inv->ownership_pct = $totalCollected > 0
+                ? round(($inv->amount / $totalCollected) * 100, 2)
+                : 0;
+            $inv->estimated_share_pct = $totalCollected > 0
+                ? round(($inv->amount / $totalCollected) * $project->investor_share, 2)
+                : 0;
+        });
+
+        return view('admin.projects.investors', compact('project', 'investments', 'totalCollected'));
     }
 
     public function destroy(Project $project): RedirectResponse
@@ -128,5 +165,74 @@ class ProjectController extends Controller
 
         return redirect()->route('admin.projects.index')
             ->with('success', 'Proyek berhasil dihapus.');
+    }
+
+    private function syncGalleries(Request $request, Project $project): void
+    {
+        if (!$request->hasFile('galleries')) {
+            return;
+        }
+
+        $existingIds = $request->input('existing_gallery_ids', []);
+        $project->galleries()->whereNotIn('id', $existingIds)->delete();
+
+        $order = 0;
+        foreach ($request->file('galleries', []) as $index => $file) {
+            $path = $file->store('projects/galleries', 'public');
+            $project->galleries()->create([
+                'image' => $path,
+                'caption' => $request->input("galleries_caption.$index"),
+                'order' => $order++,
+            ]);
+        }
+    }
+
+    private function syncMilestones(Request $request, Project $project): void
+    {
+        $project->milestones()->delete();
+
+        $phases = $request->input('milestones', []);
+        foreach ($phases as $i => $milestone) {
+            if (empty($milestone['phase_name'])) continue;
+            $project->milestones()->create([
+                'phase_name' => $milestone['phase_name'],
+                'description' => $milestone['description'] ?? null,
+                'target_date' => $milestone['target_date'] ?? null,
+                'is_completed' => isset($milestone['is_completed']),
+                'order' => $i,
+            ]);
+        }
+    }
+
+    private function syncDocuments(Request $request, Project $project): void
+    {
+        $removeIds = $request->input('remove_doc_ids', []);
+        if (!empty($removeIds)) {
+            $project->documents()->whereIn('id', $removeIds)->delete();
+        }
+
+        foreach ($request->file('documents', []) as $i => $file) {
+            $path = $file->store('projects/documents', 'public');
+            $project->documents()->create([
+                'name' => $request->input("document_names.$i"),
+                'file' => $path,
+                'type' => $request->input("document_types.$i", 'other'),
+            ]);
+        }
+    }
+
+    private function syncFaqs(Request $request, Project $project): void
+    {
+        $project->faqs()->delete();
+
+        $faqs = $request->input('faqs', []);
+        foreach ($faqs as $i => $faq) {
+            if (empty($faq['question'])) continue;
+            $project->faqs()->create([
+                'question' => $faq['question'],
+                'answer' => $faq['answer'],
+                'order' => $i,
+            ]);
+        }
     }
 }

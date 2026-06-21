@@ -17,10 +17,9 @@
                         <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft</option>
                         <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Menunggu</option>
                         <option value="fundraising" {{ request('status') === 'fundraising' ? 'selected' : '' }}>Penggalangan Dana</option>
-                        <option value="funded" {{ request('status') === 'funded' ? 'selected' : '' }}>Terdanai</option>
-                        <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Berjalan</option>
+                        <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>Berjalan</option>
                         <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Selesai</option>
-                        <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
+                        <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Ditolak</option>
                     </select>
                     <button type="submit" class="px-4 py-2 bg-dark-primary border border-gray-700 text-gray-300 rounded-lg hover:border-gold transition-all text-sm">Filter</button>
                 </form>
@@ -52,6 +51,9 @@
                                         </a>
                                         <a href="{{ route('admin.projects.edit', $project) }}" class="p-1.5 text-gray-400 hover:text-gold transition-colors" title="Edit">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                        </a>
+                                        <a href="{{ route('admin.projects.investors', $project) }}" class="p-1.5 text-gray-400 hover:text-emerald transition-colors" title="Lihat Pendana">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                                         </a>
                                         <form method="POST" action="{{ route('admin.projects.destroy', $project) }}" onsubmit="return confirm('Hapus proyek ini?')" class="inline">
                                             @csrf @method('DELETE')

@@ -38,6 +38,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('topups/{topup}/reject', [AdminTopupController::class, 'reject'])->name('topups.reject');
         Route::get('landing-page', [LandingPageController::class, 'index'])->name('landing-page.index');
         Route::put('landing-page/{landingPageContent}', [LandingPageController::class, 'update'])->name('landing-page.update');
+        Route::get('projects/{project}/investors', [AdminProjectController::class, 'investors'])->name('projects.investors');
         Route::get('profit-distributions', [ProfitDistributionController::class, 'index'])->name('profit-distributions.index');
         Route::post('profit-distributions', [ProfitDistributionController::class, 'store'])->name('profit-distributions.store');
     });

@@ -8,6 +8,14 @@
         <div class="grid sm:grid-cols-4 gap-4">
             <div class="bg-dark-card border border-gray-700 rounded-xl p-6">
                 <div class="flex items-center justify-between mb-2">
+                    <p class="text-sm text-gray-400">Total Asset</p>
+                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                </div>
+                <p class="text-2xl font-bold text-blue-400">Rp {{ number_format($totalAsset, 0, ',', '.') }}</p>
+                <p class="text-xs text-gray-500 mt-2">Total seluruh saldo yang pernah di-topup</p>
+            </div>
+            <div class="bg-dark-card border border-gray-700 rounded-xl p-6">
+                <div class="flex items-center justify-between mb-2">
                     <p class="text-sm text-gray-400">Saldo Tersedia</p>
                     <svg class="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 </div>
@@ -20,6 +28,7 @@
                     <svg class="w-5 h-5 text-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                 </div>
                 <p class="text-2xl font-bold text-emerald">Rp {{ number_format($totalInvested, 0, ',', '.') }}</p>
+                <p class="text-xs text-gray-500 mt-2">Diinvestasikan di proyek berjalan</p>
             </div>
             <div class="bg-dark-card border border-gray-700 rounded-xl p-6">
                 <div class="flex items-center justify-between mb-2">
@@ -27,16 +36,7 @@
                     <svg class="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <p class="text-2xl font-bold text-gold">Rp {{ number_format($totalProfit, 0, ',', '.') }}</p>
-            </div>
-            <div class="bg-dark-card border border-gray-700 rounded-xl p-6">
-                <div class="flex items-center justify-between mb-2">
-                    <p class="text-sm text-gray-400">Jumlah Investasi</p>
-                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                </div>
-                <p class="text-2xl font-bold text-blue-400">{{ $investmentCount }}</p>
-                @if($pendingTopups > 0)
-                    <span class="text-xs text-yellow-400 mt-2 inline-block">{{ $pendingTopups }} topup pending</span>
-                @endif
+                <p class="text-xs text-gray-500 mt-2">Imbal hasil dari proyek</p>
             </div>
         </div>
 

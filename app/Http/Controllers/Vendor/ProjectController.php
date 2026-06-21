@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Vendor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use App\Models\ProjectFaq;
+use App\Models\ProjectMilestone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -69,7 +71,10 @@ class ProjectController extends Controller
             $validated['cover_image'] = $request->file('cover_image')->store('projects/covers', 'public');
         }
 
-        Project::create($validated);
+        $project = Project::create($validated);
+
+        $this->syncMilestones($request, $project);
+        $this->syncFaqs($request, $project);
 
         return redirect()->route('vendor.projects.index')
             ->with('success', 'Proyek berhasil dibuat sebagai draft.');
@@ -128,6 +133,9 @@ class ProjectController extends Controller
 
         $project->update($validated);
 
+        $this->syncMilestones($request, $project);
+        $this->syncFaqs($request, $project);
+
         return redirect()->route('vendor.projects.index')
             ->with('success', 'Proyek berhasil diperbarui.');
     }
@@ -168,5 +176,37 @@ class ProjectController extends Controller
 
         return redirect()->route('vendor.projects.index')
             ->with('success', 'Proyek berhasil diajukan untuk review.');
+    }
+
+    private function syncMilestones(Request $request, Project $project): void
+    {
+        $project->milestones()->delete();
+
+        $phases = $request->input('milestones', []);
+        foreach ($phases as $i => $milestone) {
+            if (empty($milestone['title'])) continue;
+            $project->milestones()->create([
+                'phase_name' => $milestone['title'],
+                'description' => $milestone['description'] ?? null,
+                'target_date' => $milestone['date'] ?? $milestone['target_date'] ?? null,
+                'is_completed' => isset($milestone['is_completed']),
+                'order' => $i,
+            ]);
+        }
+    }
+
+    private function syncFaqs(Request $request, Project $project): void
+    {
+        $project->faqs()->delete();
+
+        $faqs = $request->input('faqs', []);
+        foreach ($faqs as $i => $faq) {
+            if (empty($faq['question'])) continue;
+            $project->faqs()->create([
+                'question' => $faq['question'],
+                'answer' => $faq['answer'],
+                'order' => $i,
+            ]);
+        }
     }
 }

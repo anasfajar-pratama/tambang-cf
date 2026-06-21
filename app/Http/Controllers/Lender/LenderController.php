@@ -24,11 +24,13 @@ class LenderController extends Controller
             ]);
         }
 
+        $totalAsset = $user->topups()->where('status', 'approved')->sum('amount') ?? 0;
         $walletBalance = $wallet->balance;
-        $totalInvested = $wallet->total_invested;
-        $totalProfit = $wallet->total_profit;
-        $investmentCount = $user->investments()->count();
-        $pendingTopups = $user->topups()->where('status', 'pending')->count();
+        $totalInvested = $user->investments()
+            ->whereHas('project', fn($q) => $q->whereIn('status', ['fundraising', 'in_progress']))
+            ->sum('amount') ?? 0;
+        $totalProfit = ProfitDistribution::whereIn('investment_id', $user->investments()->select('id'))
+            ->sum('amount') ?? 0;
 
         $recentInvestments = $user
             ->investments()
@@ -52,10 +54,9 @@ class LenderController extends Controller
         return view('lender.dashboard', compact(
             'wallet',
             'walletBalance',
+            'totalAsset',
             'totalInvested',
             'totalProfit',
-            'investmentCount',
-            'pendingTopups',
             'recentInvestments',
             'recentProfitDistributions',
             'activeProjects',

@@ -13,7 +13,21 @@ class UserController extends Controller
 {
     public function index(): View
     {
-        $users = User::latest()->paginate(15);
+        $query = User::latest();
+
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($role = request('role')) {
+            $query->where('role', $role);
+        }
+
+        $users = $query->paginate(15);
+
         return view('admin.users.index', compact('users'));
     }
 

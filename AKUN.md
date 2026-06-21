@@ -4,7 +4,7 @@ Akun Login
 Role	Email
 Admin	admin@tambang.com (mailto:admin@tambang.com)
 Vendor	vendor@tambang.com (mailto:vendor@tambang.com)
-Lender	budi@example.com (mailto:budi@example.com)
+Lender	ari@example.com (mailto:budi@example.com)
 Lender	siti@example.com (mailto:siti@example.com)
 Fitur yang Selesai
 Publik:

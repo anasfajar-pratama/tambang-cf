@@ -1,11 +1,11 @@
 <x-app-layout>
     {{-- Hero --}}
-    <section class="relative min-h-screen flex items-center overflow-hidden bg-dark-primary">
+    <section class="relative min-h-screen flex items-center overflow-hidden bg-dark-primary" x-data="{ current: 0, images: ['https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1920&q=80', 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=1920&q=80', 'https://images.unsplash.com/photo-1541873676-a18131494184?w=1920&q=80'], loaded: false }" x-init="loaded = true; setInterval(() => { current = (current + 1) % images.length }, 5000)">
         <div class="absolute inset-0">
-            <div class="absolute inset-0 bg-gradient-to-br from-dark-primary via-dark-secondary to-dark-primary opacity-90"></div>
-            <div class="absolute top-20 left-10 w-72 h-72 bg-gold/5 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-20 right-10 w-96 h-96 bg-emerald/5 rounded-full blur-3xl"></div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gold/3 rounded-full blur-3xl"></div>
+            <template x-for="(image, index) in images" :key="index">
+                <div x-show="current === index" x-transition:enter="transition-opacity duration-1000" x-transition:leave="transition-opacity duration-1000" class="absolute inset-0 bg-cover bg-center" :style="'background-image: url(' + image + ')'"></div>
+            </template>
+            <div class="absolute inset-0 bg-gradient-to-br from-dark-primary/80 via-dark-secondary/70 to-dark-primary/80"></div>
         </div>
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
             <div class="text-center max-w-4xl mx-auto">
@@ -43,7 +43,7 @@
                 <div class="text-sm text-gray-400">Total Proyek</div>
             </div>
             <div x-data="{ count: 0, target: {{ $stats['total_funding'] ?? 0 }} }" x-init="() => { const interval = setInterval(() => { if (count < target) count += 10000000; else clearInterval(interval); }, 5); }" class="bg-dark-card border border-gray-700 rounded-xl p-6 text-center hover:border-gold/50 transition-all">
-                <div class="text-3xl font-bold text-emerald mb-1">Rp <span x-text="count.toLocaleString('id-ID')"></span>+</div>
+                <div class="text-3xl font-bold text-emerald mb-1">Rp <span x-text="new Intl.NumberFormat('id-ID', { notation: 'compact', compactDisplay: 'short' }).format(count)"></span>+</div>
                 <div class="text-sm text-gray-400">Total Dana Terkumpul</div>
             </div>
             <div x-data="{ count: 0, target: {{ $stats['total_investors'] ?? 0 }} }" x-init="() => { const interval = setInterval(() => { if (count < target) count++; else clearInterval(interval); }, 10); }" class="bg-dark-card border border-gray-700 rounded-xl p-6 text-center hover:border-gold/50 transition-all">
@@ -51,11 +51,13 @@
                 <div class="text-sm text-gray-400">Total Investor</div>
             </div>
             <div x-data="{ count: 0, target: {{ $stats['total_profit'] ?? 0 }} }" x-init="() => { const interval = setInterval(() => { if (count < target) count += 5000000; else clearInterval(interval); }, 5); }" class="bg-dark-card border border-gray-700 rounded-xl p-6 text-center hover:border-gold/50 transition-all">
-                <div class="text-3xl font-bold text-emerald mb-1">Rp <span x-text="count.toLocaleString('id-ID')"></span>+</div>
+                <div class="text-3xl font-bold text-emerald mb-1">Rp <span x-text="new Intl.NumberFormat('id-ID', { notation: 'compact', compactDisplay: 'short' }).format(count)"></span>+</div>
                 <div class="text-sm text-gray-400">Total Bagi Hasil</div>
             </div>
         </div>
     </section>
+
+    <div class="h-20"></div>
 
     {{-- How It Works --}}
     <section class="py-20 bg-dark-secondary">
@@ -69,9 +71,8 @@
                     <div class="w-20 h-20 mx-auto bg-gradient-to-br from-gold/20 to-gold-light/10 border border-gold/30 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <svg class="w-10 h-10 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                     </div>
-                    <div class="relative">
-                        <span class="absolute -top-8 left-1/2 -translate-x-1/2 text-6xl font-bold text-gold/10">01</span>
-                        <h3 class="text-xl font-bold text-white mb-2">Daftar & Top Up</h3>
+                    <div>
+                        <h3 class="text-xl font-bold text-white mb-2">1. Daftar & Top Up</h3>
                         <p class="text-gray-400">Buat akun Anda dalam hitungan menit dan lakukan deposit saldo untuk mulai berinvestasi.</p>
                     </div>
                 </div>
@@ -79,9 +80,8 @@
                     <div class="w-20 h-20 mx-auto bg-gradient-to-br from-emerald/20 to-emerald-light/10 border border-emerald/30 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <svg class="w-10 h-10 text-emerald" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                     </div>
-                    <div class="relative">
-                        <span class="absolute -top-8 left-1/2 -translate-x-1/2 text-6xl font-bold text-emerald/10">02</span>
-                        <h3 class="text-xl font-bold text-white mb-2">Pilih Proyek</h3>
+                    <div>
+                        <h3 class="text-xl font-bold text-white mb-2">2. Pilih Proyek</h3>
                         <p class="text-gray-400">Jelajahi proyek tambang yang tersedia dan pilih yang paling sesuai dengan tujuan investasi Anda.</p>
                     </div>
                 </div>
@@ -89,9 +89,8 @@
                     <div class="w-20 h-20 mx-auto bg-gradient-to-br from-gold/20 to-emerald/10 border border-gold/30 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <svg class="w-10 h-10 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     </div>
-                    <div class="relative">
-                        <span class="absolute -top-8 left-1/2 -translate-x-1/2 text-6xl font-bold text-gold/10">03</span>
-                        <h3 class="text-xl font-bold text-white mb-2">Dapatkan Bagi Hasil</h3>
+                    <div>
+                        <h3 class="text-xl font-bold text-white mb-2">3. Dapatkan Bagi Hasil</h3>
                         <p class="text-gray-400">Nikmati keuntungan dari bagi hasil secara rutin sesuai dengan kesepakatan yang telah ditentukan.</p>
                     </div>
                 </div>
@@ -139,13 +138,34 @@
                         </div>
                     </div>
                 </div>
-                <div class="relative">
-                    <div class="aspect-square rounded-2xl bg-gradient-to-br from-dark-card to-gray-800 border border-gray-700 flex items-center justify-center">
-                        <div class="text-center p-8">
-                            <svg class="w-24 h-24 mx-auto text-gold/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                            <p class="text-gray-400 italic">"Investasi Tambang, Raih Keuntungan Bersama Kami"</p>
+                <div class="relative" x-data="{ current: 0, images: [
+                    'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=800&q=80',
+                    'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=800&q=80',
+                    'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80'
+                ] }">
+                    <div class="aspect-square rounded-2xl overflow-hidden border border-gray-700 relative">
+                        <template x-for="(image, index) in images" :key="index">
+                            <img x-show="current === index"
+                                 x-transition:enter="transition-opacity duration-700"
+                                 x-transition:leave="transition-opacity duration-700"
+                                 :src="image"
+                                 class="absolute inset-0 w-full h-full object-cover">
+                        </template>
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-primary/60 to-transparent"></div>
+                        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                            <template x-for="(image, index) in images" :key="index">
+                                <button @click="current = index"
+                                        :class="current === index ? 'bg-gold w-6' : 'bg-white/40 w-2'"
+                                        class="h-2 rounded-full transition-all duration-300"></button>
+                            </template>
                         </div>
                     </div>
+                    <button @click="current = (current - 1 + images.length) % images.length" class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-dark-card/80 border border-gray-600 flex items-center justify-center text-white hover:bg-gold hover:border-gold transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    </button>
+                    <button @click="current = (current + 1) % images.length" class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-dark-card/80 border border-gray-600 flex items-center justify-center text-white hover:bg-gold hover:border-gold transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </button>
                 </div>
             </div>
         </div>

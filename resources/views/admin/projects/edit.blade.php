@@ -13,7 +13,23 @@
                   newDocuments: [],
                   existingGalleries: {{ Illuminate\Support\Js::from($existingGalleriesJson) }},
                   removeGalleryIds: [],
-                  removeDocIds: []
+                  removeDocIds: [],
+                  replacedGalleries: {},
+                  toast: { show: false, message: '', type: 'success' },
+                  showToast(message, type = 'success') {
+                      this.toast = { show: true, message, type };
+                      setTimeout(() => this.toast.show = false, 3000);
+                  },
+                  onReplaceGallery(g, event) {
+                      const file = event.target.files[0];
+                      if (file) {
+                          this.replacedGalleries[g.id] = file.name;
+                          const reader = new FileReader();
+                          reader.onload = (e) => { g.url = e.target.result; };
+                          reader.readAsDataURL(file);
+                          this.showToast('Gambar baru dipilih');
+                      }
+                  }
               }">
             @csrf @method('PUT')
 
@@ -157,15 +173,19 @@
                     <button type="button" @click="newGalleries.push({})" class="text-sm text-gold hover:text-gold-light transition-colors">+ Tambah Gambar</button>
                 </div>
                 <template x-for="(g, i) in existingGalleries" :key="'eg-'+g.id">
-                    <div class="flex items-start space-x-3 mb-3 p-3 bg-dark-primary rounded-lg" x-show="!removeGalleryIds.includes(g.id)">
+                    <div class="flex items-start space-x-3 mb-3 p-3 bg-dark-primary rounded-lg">
                         <input type="hidden" :name="'existing_gallery_ids[]'" :value="g.id">
-                        <div class="w-20 h-14 rounded overflow-hidden flex-shrink-0 bg-dark-card">
+                        <div class="relative w-20 h-14 rounded overflow-hidden flex-shrink-0 bg-dark-card group">
                             <img :src="g.url" class="w-full h-full object-cover">
+                            <button type="button" @click="document.getElementById('replace-gal-'+g.id).click()" class="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            </button>
+                            <input type="file" :name="'replaced_gallery_images['+g.id+']'" accept="image/*" class="hidden" :id="'replace-gal-'+g.id" @change="onReplaceGallery(g, $event)">
                         </div>
                         <div class="flex-1">
                             <input type="text" x-model="g.caption" :name="'existing_gallery_captions['+g.id+']'" placeholder="Caption" class="w-full bg-dark-primary border border-gray-700 text-gray-200 rounded-lg px-3 py-1.5 text-sm focus:border-gold focus:ring-gold/20">
                         </div>
-                        <button type="button" @click="removeGalleryIds.push(g.id)" class="p-1 text-red-400 hover:text-red-300 transition-colors flex-shrink-0 mt-1">
+                        <button type="button" @click="existingGalleries.splice(i, 1); removeGalleryIds.push(g.id); showToast('Gambar berhasil dihapus')" class="p-1 text-red-400 hover:text-red-300 transition-colors flex-shrink-0 mt-1">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
                     </div>
@@ -176,7 +196,7 @@
                             <input type="file" :name="'galleries['+i+']'" accept="image/*" class="w-full text-sm text-gray-300 file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-gold/20 file:text-gold file:text-sm">
                             <input type="text" :name="'galleries_caption['+i+']'" placeholder="Caption" class="w-full mt-2 bg-dark-primary border border-gray-700 text-gray-200 rounded-lg px-3 py-1.5 text-sm focus:border-gold focus:ring-gold/20">
                         </div>
-                        <button type="button" @click="newGalleries.splice(i, 1)" class="p-1 text-red-400 hover:text-red-300 transition-colors flex-shrink-0 mt-1">
+                        <button type="button" @click="newGalleries.splice(i, 1); showToast('Gambar baru berhasil dihapus')" class="p-1 text-red-400 hover:text-red-300 transition-colors flex-shrink-0 mt-1">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
                     </div>
@@ -204,7 +224,7 @@
                                 <span>Selesai</span>
                             </label>
                         </div>
-                        <button type="button" @click="milestones.splice(i, 1)" class="p-1 text-red-400 hover:text-red-300 transition-colors flex-shrink-0 mt-1">
+                        <button type="button" @click="milestones.splice(i, 1); showToast('Pencapaian berhasil dihapus')" class="p-1 text-red-400 hover:text-red-300 transition-colors flex-shrink-0 mt-1">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
                     </div>
@@ -230,7 +250,7 @@
                             <a href="{{ asset('storage/' . $doc->file) }}" target="_blank" class="text-xs text-gold hover:text-gold-light mr-3">Lihat</a>
                         </div>
                         <label class="flex items-center space-x-1 text-xs text-red-400 flex-shrink-0 mt-1 cursor-pointer">
-                            <input type="checkbox" name="remove_doc_ids[]" value="{{ $doc->id }}" class="rounded border-gray-600 bg-dark-primary text-red-500 focus:ring-red/20">
+                            <input type="checkbox" name="remove_doc_ids[]" value="{{ $doc->id }}" class="rounded border-gray-600 bg-dark-primary text-red-500 focus:ring-red/20" @change="if($event.target.checked) showToast('Dokumen akan dihapus saat update')">
                             <span>Hapus</span>
                         </label>
                     </div>
@@ -248,7 +268,7 @@
                             </select>
                             <input type="file" :name="'documents['+i+']'" accept=".pdf,.doc,.docx" class="w-full text-sm text-gray-300 file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-gold/20 file:text-gold file:text-sm">
                         </div>
-                        <button type="button" @click="newDocuments.splice(i, 1)" class="p-1 text-red-400 hover:text-red-300 transition-colors flex-shrink-0 mt-1">
+                        <button type="button" @click="newDocuments.splice(i, 1); showToast('Dokumen baru berhasil dihapus')" class="p-1 text-red-400 hover:text-red-300 transition-colors flex-shrink-0 mt-1">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
                     </div>
@@ -269,12 +289,26 @@
                             <input type="text" x-model="f.question" :name="'faqs['+i+'][question]'" placeholder="Pertanyaan" class="w-full bg-dark-primary border border-gray-700 text-gray-200 rounded-lg px-3 py-1.5 text-sm focus:border-gold focus:ring-gold/20" required>
                             <textarea x-model="f.answer" :name="'faqs['+i+'][answer]'" placeholder="Jawaban" class="w-full bg-dark-primary border border-gray-700 text-gray-200 rounded-lg px-3 py-1.5 text-sm focus:border-gold focus:ring-gold/20"></textarea>
                         </div>
-                        <button type="button" @click="faqs.splice(i, 1)" class="p-1 text-red-400 hover:text-red-300 transition-colors flex-shrink-0 mt-1">
+                        <button type="button" @click="faqs.splice(i, 1); showToast('FAQ berhasil dihapus')" class="p-1 text-red-400 hover:text-red-300 transition-colors flex-shrink-0 mt-1">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
                     </div>
                 </template>
                 <p class="text-xs text-gray-500" x-show="faqs.length === 0">Belum ada FAQ. Klik "Tambah FAQ" untuk menambahkan.</p>
+            </div>
+
+            <template x-for="id in removeGalleryIds" :key="'rg-'+id">
+                <input type="hidden" name="remove_gallery_ids[]" :value="id">
+            </template>
+
+            <div x-show="toast.show" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-2" class="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-2.5" :class="toast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'" style="display: none;">
+                <template x-if="toast.type === 'success'">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </template>
+                <template x-if="toast.type === 'error'">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </template>
+                <span x-text="toast.message" class="text-sm font-medium"></span>
             </div>
 
             <div class="flex items-center space-x-4">

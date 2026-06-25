@@ -188,12 +188,26 @@ class ProjectController extends Controller
 
     private function syncGalleries(Request $request, Project $project): void
     {
-        if (!$request->hasFile('galleries')) {
-            return;
+        $removeIds = $request->input('remove_gallery_ids', []);
+        if (!empty($removeIds)) {
+            $project->galleries()->whereIn('id', $removeIds)->delete();
         }
 
         $existingIds = $request->input('existing_gallery_ids', []);
         $project->galleries()->whereNotIn('id', $existingIds)->delete();
+
+        $replacedImages = $request->file('replaced_gallery_images', []);
+        foreach ($replacedImages as $galleryId => $file) {
+            $gallery = $project->galleries()->find($galleryId);
+            if ($gallery) {
+                $path = $file->store('projects/galleries', 'public');
+                $gallery->update(['image' => $path]);
+            }
+        }
+
+        if (!$request->hasFile('galleries')) {
+            return;
+        }
 
         $order = 0;
         foreach ($request->file('galleries', []) as $index => $file) {
